@@ -1,16 +1,19 @@
 package com.rafsan.impressiontracker.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.rafsan.impressiontracker.R
+import com.rafsan.impressiontracker.data.ListItem
 import com.rafsan.impressiontracker.databinding.RecylerviewItemBinding
-import java.util.*
 
-class ItemAdapter : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
+class ItemAdapter(context: Context) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
-    private val itemList: List<String> = List(1000) { "$it" }
-    private val viewPositions = WeakHashMap<View, Int>()
+    private var provider: Context = context
+    private var itemList: ArrayList<ListItem> = arrayListOf()
 
     inner class ItemViewHolder(val binding: RecylerviewItemBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -32,8 +35,36 @@ class ItemAdapter : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val index = itemList[position]
         with(holder) {
-            binding.tvNumber.text = index
+            binding.tvNumber.text = index.position.toString()
+            if (index.isViewed) {
+                binding.rowBackground.setBackgroundColor(
+                    ContextCompat.getColor(
+                        provider,
+                        R.color.white
+                    )
+                )
+            } else {
+                binding.rowBackground.setBackgroundColor(
+                    ContextCompat.getColor(
+                        provider,
+                        R.color.background
+                    )
+                )
+            }
         }
-        viewPositions.put(holder.itemView, position)
+    }
+
+    fun setListData(items: ArrayList<ListItem>) {
+        this.itemList = items
+    }
+
+    fun updateListItems(items: List<ListItem>?) {
+        items?.let {
+            val diffCallback = ItemDiffUtilCallback(this.itemList, it)
+            val diffResult = DiffUtil.calculateDiff(diffCallback)
+            this.itemList.clear()
+            this.itemList.addAll(items)
+            diffResult.dispatchUpdatesTo(this)
+        }
     }
 }

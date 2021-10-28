@@ -7,12 +7,15 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rafsan.impressiontracker.adapter.ItemAdapter
+import com.rafsan.impressiontracker.data.ListItem
 import com.rafsan.impressiontracker.databinding.ActivityMainBinding
 import com.rafsan.impressiontracker.tracker.ImpressionTracker
 import com.rafsan.impressiontracker.tracker.VisibleRows
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var listData: ArrayList<ListItem>
+    private lateinit var itemAdapter: ItemAdapter
     private lateinit var binding: ActivityMainBinding
     private var tracker: ImpressionTracker? = null
     private val TAG: String = MainActivity::class.java.getName()
@@ -21,10 +24,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        createDummyList()
         setupRecyclerView()
     }
 
     private fun setupRecyclerView() {
+        itemAdapter = ItemAdapter(this)
+        itemAdapter.setListData(listData)
         // initialize an instance of linear layout manager
         val layoutManager = LinearLayoutManager(
             this,
@@ -34,12 +40,6 @@ class MainActivity : AppCompatActivity() {
             // specify the layout manager for recycler view
             binding.recylerview.layoutManager = this
         }
-
-        // finally, data bind the recycler view with adapter
-        ItemAdapter().apply {
-            binding.recylerview.adapter = this
-        }
-
 
         // initialize an instance of divider item decoration
         DividerItemDecoration(
@@ -51,16 +51,19 @@ class MainActivity : AppCompatActivity() {
             binding.recylerview.addItemDecoration(this)
         }
 
-        binding.recylerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val visibleStateFinal = VisibleRows(
-                    layoutManager.findFirstCompletelyVisibleItemPosition(),
-                    layoutManager.findLastCompletelyVisibleItemPosition()
-                )
-                tracker?.postViewEvent(visibleStateFinal)
-            }
-        })
+        binding.recylerview.apply {
+            adapter = itemAdapter
+            this.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    val visibleStateFinal = VisibleRows(
+                        layoutManager.findFirstCompletelyVisibleItemPosition(),
+                        layoutManager.findLastCompletelyVisibleItemPosition()
+                    )
+                    tracker?.postViewEvent(visibleStateFinal)
+                }
+            })
+        }
     }
 
     override fun onResume() {
@@ -78,6 +81,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun onTrackViewResponse(visibleRows: VisibleRows?) {
         Log.d(TAG, "Received to be tracked: $visibleRows")
-
+        visibleRows?.let {
+            val from = it.firstCompletelyVisible
+            val to = it.lastCompletelyVisible
+            for (i in from..to) {
+                val item = listData[i]
+                item.isViewed = true
+                listData.set(i, item)
+            }
+            itemAdapter.updateListItems(listData)
+        }
     }
+
+    private fun createDummyList() {
+        listData = arrayListOf()
+        for (i in 1..1000) {
+            val item = ListItem(i, false)
+            listData.add(item)
+        }
+    }
+
 }

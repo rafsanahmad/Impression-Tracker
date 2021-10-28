@@ -12,7 +12,7 @@ import java.util.function.Consumer
 class ImpressionTracker {
 
     private val TAG = ImpressionTracker::class.java.getName()
-    private var THRESHOLD_MS = 3000L
+    private var THRESHOLD_MS = 500L
     private lateinit var publishSubject: Subject<VisibleRows>
     private var disposable: Disposable? = null
     private var onSuccess: Consumer<VisibleRows>? = null
