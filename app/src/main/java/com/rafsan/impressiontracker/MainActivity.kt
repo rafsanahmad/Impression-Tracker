@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun createDummyList() {
         listData = arrayListOf()
-        for (i in 1..1000) {
+        for (i in 0..1000) {
             val item = ListItem(i, false)
             listData.add(item)
         }

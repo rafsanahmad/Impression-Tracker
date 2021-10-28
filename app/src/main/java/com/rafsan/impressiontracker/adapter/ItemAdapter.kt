@@ -13,7 +13,7 @@ import com.rafsan.impressiontracker.databinding.RecylerviewItemBinding
 class ItemAdapter(context: Context) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
     private var provider: Context = context
-    private var itemList: ArrayList<ListItem> = arrayListOf()
+    private lateinit var itemList: ArrayList<ListItem>
 
     inner class ItemViewHolder(val binding: RecylerviewItemBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -55,7 +55,8 @@ class ItemAdapter(context: Context) : RecyclerView.Adapter<ItemAdapter.ItemViewH
     }
 
     fun setListData(items: ArrayList<ListItem>) {
-        this.itemList = items
+        itemList = arrayListOf()
+        this.itemList.addAll(items)
     }
 
     fun updateListItems(items: List<ListItem>?) {
