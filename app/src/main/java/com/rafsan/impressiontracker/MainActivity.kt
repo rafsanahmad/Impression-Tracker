@@ -1,15 +1,21 @@
 package com.rafsan.impressiontracker
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.rafsan.impressiontracker.adapter.ItemAdapter
 import com.rafsan.impressiontracker.databinding.ActivityMainBinding
+import com.rafsan.impressiontracker.tracker.ImpressionTracker
+import com.rafsan.impressiontracker.tracker.VisibleRows
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var tracker: ImpressionTracker? = null
+    private val TAG: String = MainActivity::class.java.getName()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,5 +50,34 @@ class MainActivity : AppCompatActivity() {
             // this will show divider line between items
             binding.recylerview.addItemDecoration(this)
         }
+
+        binding.recylerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val visibleStateFinal = VisibleRows(
+                    layoutManager.findFirstCompletelyVisibleItemPosition(),
+                    layoutManager.findLastCompletelyVisibleItemPosition()
+                )
+                tracker?.postViewEvent(visibleStateFinal)
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        tracker = ImpressionTracker()
+        tracker?.startTracking { visibleRows: VisibleRows? ->
+            this.onTrackViewResponse(visibleRows)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        tracker?.stopTracking()
+    }
+
+    private fun onTrackViewResponse(visibleRows: VisibleRows?) {
+        Log.d(TAG, "Received to be tracked: $visibleRows")
+
     }
 }
