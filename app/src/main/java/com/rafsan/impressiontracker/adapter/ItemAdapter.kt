@@ -37,6 +37,8 @@ class ItemAdapter(context: Context) : RecyclerView.Adapter<ItemAdapter.ItemViewH
         with(holder) {
             binding.tvNumber.text = index.position.toString()
             if (index.isViewed) {
+                val text = index.position.toString()
+                binding.tvNumber.text = text
                 binding.rowBackground.setBackgroundColor(
                     ContextCompat.getColor(
                         provider,

@@ -80,16 +80,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onTrackViewResponse(visibleRows: VisibleRows?) {
-        Log.d(TAG, "Received to be tracked: $visibleRows")
+        Log.d(TAG, "Tracking : $visibleRows")
         visibleRows?.let {
             val from = it.firstCompletelyVisible
             val to = it.lastCompletelyVisible
             for (i in from..to) {
                 val item = listData[i]
+                //You can send the list item to network or store in local DB
                 item.isViewed = true
                 listData.set(i, item)
             }
             itemAdapter.updateListItems(listData)
+            //itemAdapter.notifyItemRangeChanged(from, to - from)
         }
     }
 
